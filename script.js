@@ -4,15 +4,15 @@ let attempts = [];
 let currentInput = [];
 let usedLetters = {};
 
-// Cargar palabras desde el archivo JSON
+// Load words from the JSON file
 fetch('mexicanadas.json')
   .then(response => response.json())
   .then(words => {
     wordToGuess = words[Math.floor(Math.random() * words.length)].toUpperCase();
   })
-  .catch(error => console.error("Error cargando las palabras:", error));
+  .catch(error => console.error("Error loading words:", error));
 
-// Inicializar el teclado visual
+// Initialize visual keyboard
 const keyboardContainer = document.getElementById("keyboard");
 const alphabet = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
 alphabet.split("").forEach(letter => {
@@ -24,7 +24,7 @@ alphabet.split("").forEach(letter => {
     keyboardContainer.appendChild(key);
 });
 
-// Crear la fila de escritura debajo de los intentos
+// Create the row where the user types the word
 const currentWordRow = document.getElementById("current-word");
 for (let i = 0; i < 5; i++) {
     const box = document.createElement("div");
@@ -32,7 +32,7 @@ for (let i = 0; i < 5; i++) {
     currentWordRow.appendChild(box);
 }
 
-// Función para agregar una letra a la palabra en construcción
+// Add a letter to the current word being typed
 function addLetter(letter) {
     if (currentInput.length < 5) {
         currentInput.push(letter);
@@ -40,13 +40,13 @@ function addLetter(letter) {
     }
 }
 
-// Función para borrar la última letra
+// Remove the last letter typed
 function removeLetter() {
     currentInput.pop();
     updateCurrentWord();
 }
 
-// Función para actualizar la fila donde se escribe la palabra
+// Update the row where the user is typing the word
 function updateCurrentWord() {
     const boxes = currentWordRow.children;
     for (let i = 0; i < 5; i++) {
@@ -54,7 +54,7 @@ function updateCurrentWord() {
     }
 }
 
-// Función para manejar el intento
+// Handle the guess attempt
 function submitGuess() {
     if (currentInput.length !== 5) {
         alert("La palabra debe tener 5 letras.");
@@ -65,6 +65,7 @@ function submitGuess() {
 
     if (attempts.length >= maxAttempts) {
         alert("¡Se acabaron los intentos!");
+        alert(`La palabra correcta era: ${wordToGuess}`);
         return;
     }
 
@@ -76,10 +77,12 @@ function submitGuess() {
 
     if (guess === wordToGuess) {
         alert("¡Felicidades! Adivinaste la palabra.");
+        // Display the correct word and stop the game
+        return;
     }
 }
 
-// Manejar el teclado físico
+// Handle physical keyboard input
 document.addEventListener("keydown", (event) => {
     const key = event.key.toUpperCase();
 
@@ -92,10 +95,10 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
-// Botón de intento
+// Button to submit the guess
 document.getElementById("guess-button").addEventListener("click", submitGuess);
 
-/* Función para actualizar el tablero de intentos
+// Update the attempt board
 function updateBoard() {
     const board = document.getElementById("game-board");
     board.innerHTML = "";
@@ -121,9 +124,8 @@ function updateBoard() {
         }
     });
 }
-*/
 
-// Función para actualizar el teclado visual
+// Update the keyboard after each guess
 function updateKeyboard(guess) {
     guess.split("").forEach(letter => {
         const key = document.getElementById(`key-${letter}`);
@@ -131,53 +133,4 @@ function updateKeyboard(guess) {
             key.classList.add(usedLetters[letter]);
         }
     });
-}
-
-// Función para actualizar el tablero de intentos con lógica mejorada
-function updateBoard() {
-    const board = document.getElementById("game-board");
-    board.innerHTML = "";
-
-    attempts.forEach(guess => {
-        const boxes = [];
-        let remainingLetters = wordToGuess.split(""); // Copia de la palabra oculta para manejar duplicados
-        let guessArray = guess.split("");
-        let status = Array(5).fill("absent"); // Estado inicial de cada letra
-        
-        // Primero, marcar las letras correctas (verdes)
-        for (let i = 0; i < 5; i++) {
-            if (guessArray[i] === wordToGuess[i]) {
-                status[i] = "correct";
-                remainingLetters[i] = null; // Marca la letra como usada en la posición correcta
-            }
-        }
-
-        // Luego, marcar las letras presentes pero en la posición incorrecta (amarillas)
-        for (let i = 0; i < 5; i++) {
-            if (status[i] !== "correct" && remainingLetters.includes(guessArray[i])) {
-                status[i] = "present";
-                remainingLetters[remainingLetters.indexOf(guessArray[i])] = null; // Marca la letra como usada
-            }
-        }
-
-        // Finalmente, construir la fila de intentos con los colores correctos
-        for (let i = 0; i < 5; i++) {
-            const box = document.createElement("div");
-            box.classList.add("letter-box", status[i]);
-            box.textContent = guessArray[i];
-
-            // Guardar estado para el teclado
-            if (!usedLetters[guessArray[i]] || usedLetters[guessArray[i]] === "present") {
-                usedLetters[guessArray[i]] = status[i];
-            }
-
-            boxes.push(box);
-        }
-
-        boxes.forEach(box => board.appendChild(box));
-    });
-
-    if (attempts[attempts.length - 1] === wordToGuess) {
-        alert("¡Felicidades! Adivinaste la palabra.");
-    }
 }
