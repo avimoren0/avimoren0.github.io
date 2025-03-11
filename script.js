@@ -64,8 +64,7 @@ function submitGuess() {
     const guess = currentInput.join("");
 
     if (attempts.length >= maxAttempts) {
-        alert("¡Se acabaron los intentos!");
-        alert(`La palabra correcta era: ${wordToGuess}`);
+        alert("¡Se acabaron los intentos! La palabra correcta era: ${wordToGuess}");
         return;
     }
 
